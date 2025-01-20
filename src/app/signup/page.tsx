@@ -1,5 +1,5 @@
-export interface IRegisterPageProps {}
-export default function RegisterPage({}: IRegisterPageProps) {
+export interface ISignupPageProps {}
+export default function SignupPage({}: ISignupPageProps) {
   return (
     <div>
       <h1
@@ -10,7 +10,7 @@ export default function RegisterPage({}: IRegisterPageProps) {
           fontSize: "1.875rem",
         }}
       >
-        This is RegisterPage component
+        This is SignupPage component
       </h1>
     </div>
   );
