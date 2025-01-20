@@ -1,0 +1,53 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { TUser } from "./types";
+import { getCurrentState } from "./redux/store";
+import jwt from "jsonwebtoken";
+
+const AuthRoutes = ["/login", "/signup"];
+
+type Role = keyof typeof roleBasedRoutes;
+
+const roleBasedRoutes = {
+  user: [/^\//],
+  admin: [/^\//, /^\/dashboard/],
+};
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  const currentState = getCurrentState();
+
+  const token: string | null = currentState.auth.token;
+
+  if (!token) {
+    if (AuthRoutes.includes(pathname)) {
+      return NextResponse.next();
+    } else {
+      return NextResponse.redirect(
+        new URL(`/login?redirect=${pathname}`, request.url)
+      );
+    }
+  }
+
+  //   Extract token
+  try {
+    const user = jwt.verify(token, process.env.JWT_SECRET!) as TUser;
+
+    if (user?.role && roleBasedRoutes[user?.role as Role]) {
+      const routes = roleBasedRoutes[user?.role as Role];
+
+      if (routes.some((route) => pathname.match(route))) {
+        return NextResponse.next();
+      }
+    }
+  } catch {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  return NextResponse.redirect(new URL("/", request.url));
+}
+
+export const config = {
+  matcher: ["/dashboard/:page*", "/login", "/signup"],
+};
