@@ -1,8 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { TUser } from "./types";
-import { getCurrentState } from "./redux/store";
-import jwt from "jsonwebtoken";
 import { verifyJWT } from "./utils/verifyJWT";
 
 const AuthRoutes = ["/login", "/signup"];
@@ -17,9 +15,7 @@ const roleBasedRoutes = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const currentState = getCurrentState();
-
-  const token: string | null = currentState.auth.token;
+  const token = request.cookies.get("accessToken")?.value;
 
   if (!token) {
     if (AuthRoutes.includes(pathname)) {

@@ -6,11 +6,10 @@ import {
   NavbarBrand,
   NavbarItem,
 } from "@heroui/navbar";
-import { Button } from "@heroui/button";
-import { Link } from "@heroui/link";
 import NextLink from "next/link";
 
-import { HeartFilledIcon, Logo } from "@/src/components/icons";
+import { Logo } from "@/src/components/icons";
+import NavbarButton from "./NavbarButton";
 
 export const Navbar = () => {
   return (
@@ -29,15 +28,8 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden md:flex">
-          <Button
-            as={Link}
-            className="text-sm font-normal text-default-600 bg-default-100"
-            href={"/dashboard"}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
-          >
-            Dashboard
-          </Button>
+          {/* Navbar buttons from client component */}
+          <NavbarButton />
         </NavbarItem>
       </NavbarContent>
 
@@ -47,15 +39,8 @@ export const Navbar = () => {
 
       <NavbarMenu>
         <div className="mx-4 mt-2 flex flex-col gap-2">
-          <Button
-            as={Link}
-            className="text-sm font-normal text-default-600 bg-default-100"
-            href={"/dashboard"}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
-          >
-            Dashboard
-          </Button>
+          {/* Navbar buttons from client component */}
+          <NavbarButton />
         </div>
       </NavbarMenu>
     </HeroUINavbar>

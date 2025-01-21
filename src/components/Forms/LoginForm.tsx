@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@heroui/button";
 import { FieldValues, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaEyeSlash } from "react-icons/fa6";
 import { FaEye } from "react-icons/fa";
 import { Link } from "@heroui/link";
@@ -23,9 +23,8 @@ export default function LoginForm({}: ILoginFormProps) {
   const [show, setShow] = useState(false);
   const router = useRouter();
   const redirect = searchParams.get("redirect");
-  const [loginUser] = useLoginMutation();
+  const [loginUser, { isLoading }] = useLoginMutation();
   const dispatch = useAppDispatch();
-  const [isPending, setIsPending] = useState(false);
 
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
     const toastId = toast.loading("Loading...");
@@ -39,7 +38,11 @@ export default function LoginForm({}: ILoginFormProps) {
         dispatch(setUser({ user: user, token: res?.data?.data?.accessToken }));
         if (user.role === "admin") {
           toast.success(res.data.message, { id: toastId });
-          router.push("/dashboard");
+          if (redirect) {
+            router.push(redirect);
+          } else {
+            router.push("/dashboard");
+          }
         } else {
           toast.success(res.data.message, { id: toastId });
           router.push("/");
@@ -47,13 +50,13 @@ export default function LoginForm({}: ILoginFormProps) {
       } else {
         toast.error("Something went wrong", { id: toastId });
       }
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong", { id: toastId });
     }
   };
 
   return (
-    <div>
+    <div className="w-11/12 lg:w-1/2 mx-auto">
       <CustomForm onSubmit={handleSubmit} resolver={zodResolver(loginSchema)}>
         <CustomInput required label="Email" name="email" type="email" />
         <div className="relative">
@@ -83,16 +86,19 @@ export default function LoginForm({}: ILoginFormProps) {
 
         <Button
           className="mt-2"
-          isDisabled={isPending}
+          isDisabled={isLoading}
           radius="sm"
           size="sm"
           type="submit"
           fullWidth
           color="primary"
         >
-          {isPending ? "Logging in..." : "Login"}
+          {isLoading ? "Logging in..." : "Login"}
         </Button>
       </CustomForm>
+      <p className="text-sm">
+        New to this website? <Link href="/signup">signup</Link>
+      </p>
     </div>
   );
 }

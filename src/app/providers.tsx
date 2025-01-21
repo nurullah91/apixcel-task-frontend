@@ -7,8 +7,9 @@ import { HeroUIProvider } from "@heroui/system";
 import { useRouter } from "next/navigation";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { Provider } from "react-redux";
-import { store } from "../redux/store";
+import { persistor, store } from "../redux/store";
 import { Toaster } from "sonner";
+import { PersistGate } from "redux-persist/integration/react";
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -28,10 +29,12 @@ export function Providers({ children, themeProps }: ProvidersProps) {
 
   return (
     <Provider store={store}>
-      <HeroUIProvider navigate={router.push}>
-        <Toaster richColors position="top-center" />
-        <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
-      </HeroUIProvider>
+      <PersistGate loading={null} persistor={persistor}>
+        <HeroUIProvider navigate={router.push}>
+          <Toaster richColors position="top-center" />
+          <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+        </HeroUIProvider>
+      </PersistGate>
     </Provider>
   );
 }
