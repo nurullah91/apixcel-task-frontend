@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -8,67 +8,157 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  getKeyValue,
 } from "@heroui/table";
 import { Spinner } from "@heroui/spinner";
 import { Pagination } from "@heroui/pagination";
-import { useGetAllProductsQuery } from "@/src/redux/api/productApi";
+import {
+  useGetAllCategoriesQuery,
+  useGetAllProductsQuery,
+} from "@/src/redux/api/productApi";
 import { TProduct } from "@/src/types";
+import { SearchIcon } from "../icons";
+import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
+import Image from "next/image";
 
-export default function App() {
+export default function ProductTable() {
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const { data, isLoading } = useGetAllProductsQuery([]);
+  // Products search and sorting states
+  const [search, setSearch] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<string>("-createdAt");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const [category, setCategory] = useState<string | undefined>(undefined);
 
-  const products = data?.data;
+  // Debounce search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
 
-  const pages = React.useMemo(() => {
-    return data?.count ? Math.ceil(data.count / rowsPerPage) : 0;
-  }, [data?.count, rowsPerPage]);
+    // timeout cleanup function
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
 
-  const loadingState = isLoading || products.length === 0 ? "loading" : "idle";
+  // Fetch products dynamically with query parameters
+  const { data: productsData, isLoading } = useGetAllProductsQuery(
+    [
+      { name: "searchTerm", value: debouncedSearch },
+      { name: "category", value: category },
+      { name: "sort", value: sortOrder },
+      { name: "page", value: page.toString() },
+    ].filter((param) => param.value !== undefined)
+  );
+  const { data: categoriesData } = useGetAllCategoriesQuery([]);
+
+  const products: TProduct[] = productsData?.data || [];
+  const totalPages = productsData?.meta?.totalPage || 1;
+  const categories = categoriesData?.data || [];
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+
+    if (value === "all") {
+      setCategory(undefined);
+    } else {
+      setCategory(value);
+    }
+  };
+
+  const loadingState = isLoading ? "loading" : "idle";
 
   return (
-    <Table
-      aria-label="Product table"
-      bottomContent={
-        pages > 0 ? (
-          <div className="flex w-full justify-center">
-            <Pagination
-              isCompact
-              showControls
-              showShadow
-              color="primary"
-              page={page}
-              total={pages}
-              onChange={(page) => setPage(page)}
-            />
-          </div>
-        ) : null
-      }
-    >
-      <TableHeader>
-        <TableColumn key="thumbnail">Thumbnail</TableColumn>
-        <TableColumn key="title">Title</TableColumn>
-        <TableColumn key="category">Category</TableColumn>
-        <TableColumn key="price">Price</TableColumn>
-        <TableColumn key="stock">Stock</TableColumn>
-        <TableColumn key="discount">Discount</TableColumn>
-      </TableHeader>
-      <TableBody
-        items={products ?? []}
-        loadingContent={<Spinner />}
-        loadingState={loadingState}
+    <div className="w-full">
+      {/* Search and Filter Section */}
+      <div className="flex items-center justify-between gap-4 mb-4 w-full">
+        <Input
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          startContent={<SearchIcon />}
+        />
+
+        <Select
+          className="max-w-xs"
+          label="Category"
+          placeholder="Filter by category"
+          value={category}
+          onChange={(e) => handleCategoryChange(e)}
+        >
+          <SelectItem key={"all"} value="all">
+            All Category
+          </SelectItem>
+
+          {categories.map((cat: string) => (
+            <SelectItem key={cat} value={cat}>
+              {cat}
+            </SelectItem>
+          ))}
+        </Select>
+
+        <Select
+          className="max-w-xs"
+          label="Sort order"
+          placeholder="Sort by"
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+        >
+          <SelectItem value="-createdAt">Newest</SelectItem>
+          <SelectItem value="createdAt">Oldest</SelectItem>
+          <SelectItem value="-price">Price: High to Low</SelectItem>
+          <SelectItem value="price">Price: Low to High</SelectItem>
+        </Select>
+      </div>
+
+      <Table
+        aria-label="Product table"
+        bottomContent={
+          totalPages > 0 ? (
+            <div className="flex w-full justify-center">
+              <Pagination
+                isCompact
+                showControls
+                showShadow
+                color="primary"
+                page={page}
+                total={totalPages}
+                onChange={(page) => setPage(page)}
+              />
+            </div>
+          ) : null
+        }
       >
-        {(item: TProduct) => (
-          <TableRow key={item?.title}>
-            {(columnKey) => (
-              <TableCell>{getKeyValue(item, columnKey)}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+        <TableHeader>
+          <TableColumn key="thumbnail">Thumbnail</TableColumn>
+          <TableColumn key="title">Title</TableColumn>
+          <TableColumn key="category">Category</TableColumn>
+          <TableColumn key="price">Price</TableColumn>
+          <TableColumn key="stock">Stock</TableColumn>
+          <TableColumn key="discount">Discount</TableColumn>
+        </TableHeader>
+        <TableBody loadingContent={<Spinner />} loadingState={loadingState}>
+          {products.map((item) => (
+            <TableRow key={item?._id}>
+              <TableCell>
+                <Image
+                  src={item.photos.thumbnail}
+                  alt={item.title}
+                  width={150}
+                  height={100}
+                  className="w-[120px] h-[80px] overflow-hidden rounded-md"
+                />
+              </TableCell>
+              <TableCell>{item.title}</TableCell>
+              <TableCell>{item.category}</TableCell>
+              <TableCell>{item.price}</TableCell>
+              <TableCell>{item.stock}</TableCell>
+              <TableCell>{item.discount}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

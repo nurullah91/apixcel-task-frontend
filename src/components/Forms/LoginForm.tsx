@@ -56,7 +56,7 @@ export default function LoginForm({}: ILoginFormProps) {
   };
 
   return (
-    <div className="w-11/12 lg:w-1/2 mx-auto">
+    <div>
       <CustomForm onSubmit={handleSubmit} resolver={zodResolver(loginSchema)}>
         <CustomInput required label="Email" name="email" type="email" />
         <div className="relative">

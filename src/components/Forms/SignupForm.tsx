@@ -16,6 +16,7 @@ import { verifyJWT } from "@/src/utils/verifyJWT";
 import { TUser } from "@/src/types";
 import { setUser } from "@/src/redux/authSlice";
 import { useAppDispatch } from "@/src/redux/store";
+import { Link } from "@heroui/link";
 export interface ILoginFormProps {}
 export default function SignupForm({}: ILoginFormProps) {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function SignupForm({}: ILoginFormProps) {
   };
 
   return (
-    <div className="w-11/12 lg:w-1/2 mx-auto">
+    <div className="w-full max-w-[600px] mx-auto">
       <CustomForm resolver={zodResolver(signupSchema)} onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           <div className="relative">
@@ -95,6 +96,9 @@ export default function SignupForm({}: ILoginFormProps) {
           {isLoading ? "Loading..." : "Signup"}
         </Button>
       </CustomForm>
+      <p className="text-sm">
+        Already Have an account? <Link href="/login">login</Link>
+      </p>
     </div>
   );
 }

@@ -35,7 +35,7 @@ export default function ChangePasswordForm() {
   };
 
   return (
-    <div>
+    <div className="w-full max-w-[600px] mx-auto">
       <CustomForm
         onSubmit={handleSubmit}
         resolver={zodResolver(changePasswordSchema)}
