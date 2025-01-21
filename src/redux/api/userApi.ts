@@ -37,6 +37,35 @@ const authApi = baseApi.injectEndpoints({
         body: userInfo,
       }),
     }),
+
+    deleteUser: builder.mutation({
+      query: (userId: string) => ({
+        url: `/users/${userId}`,
+        method: "DELETE",
+      }),
+    }),
+
+    getSingleUser: builder.query({
+      query: (userId: string) => ({
+        url: `/users/${userId}`,
+        method: "GET",
+      }),
+    }),
+
+    changeProfile: builder.mutation({
+      query: (userInfo) => ({
+        url: `/users/update-profile/${userInfo.id}`,
+        method: "PATCH",
+        body: userInfo.data,
+      }),
+    }),
+    changeCover: builder.mutation({
+      query: (userInfo) => ({
+        url: `/users/update-cover/${userInfo.id}`,
+        method: "PATCH",
+        body: userInfo.data,
+      }),
+    }),
   }),
 });
 
@@ -46,4 +75,8 @@ export const {
   useForgetPasswordMutation,
   useResetPasswordMutation,
   useChangePasswordMutation,
+  useDeleteUserMutation,
+  useGetSingleUserQuery,
+  useChangeCoverMutation,
+  useChangeProfileMutation,
 } = authApi;

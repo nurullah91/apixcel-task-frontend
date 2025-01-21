@@ -11,6 +11,11 @@ import { Link } from "@heroui/link";
 import CustomForm from "./CustomFrom";
 import CustomInput from "./CustomInput";
 import { loginSchema } from "@/src/schema";
+import { useLoginMutation } from "@/src/redux/api/userApi";
+import { TUser } from "@/src/types";
+import { verifyJWT } from "@/src/utils/verifyJWT";
+import { useAppDispatch } from "@/src/redux/store";
+import { setUser } from "@/src/redux/authSlice";
 
 export interface ILoginFormProps {}
 export default function LoginForm({}: ILoginFormProps) {
@@ -18,25 +23,33 @@ export default function LoginForm({}: ILoginFormProps) {
   const [show, setShow] = useState(false);
   const router = useRouter();
   const redirect = searchParams.get("redirect");
-
+  const [loginUser] = useLoginMutation();
+  const dispatch = useAppDispatch();
   const [isPending, setIsPending] = useState(false);
-  //   useEffect(() => {
-  //     // if (data && !data?.success) {
-  //     //   toast.error(data?.message as string);
-  //     // } else if (data && data?.success) {
-  //     //   toast.success(data.message);
-  //     //   if (redirect) {
-  //     //     router.push(redirect);
-  //     //   } else {
-  //     //     router.push("/");
-  //     //   }
-  //     // }
-  //   }, [data]);
 
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
-    // handleLogin(JSON.stringify(data));
-    // userLoading(true);
-    console.log(data);
+    const toastId = toast.loading("Loading...");
+
+    try {
+      const res = await loginUser(data);
+
+      if (res.data.data.accessToken) {
+        const user = verifyJWT(res.data?.data?.accessToken) as TUser;
+
+        dispatch(setUser({ user: user, token: res?.data?.data?.accessToken }));
+        if (user.role === "admin") {
+          toast.success(res.data.message, { id: toastId });
+          router.push("/dashboard");
+        } else {
+          toast.success(res.data.message, { id: toastId });
+          router.push("/");
+        }
+      } else {
+        toast.error("Something went wrong", { id: toastId });
+      }
+    } catch (error) {
+      toast.error("Something went wrong", { id: toastId });
+    }
   };
 
   return (

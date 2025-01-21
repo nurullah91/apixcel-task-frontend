@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { TUser } from "./types";
 import { getCurrentState } from "./redux/store";
 import jwt from "jsonwebtoken";
+import { verifyJWT } from "./utils/verifyJWT";
 
 const AuthRoutes = ["/login", "/signup"];
 
@@ -32,7 +33,7 @@ export async function middleware(request: NextRequest) {
 
   //   Extract token
   try {
-    const user = jwt.verify(token, process.env.JWT_SECRET!) as TUser;
+    const user = verifyJWT(token) as TUser;
 
     if (user?.role && roleBasedRoutes[user?.role as Role]) {
       const routes = roleBasedRoutes[user?.role as Role];

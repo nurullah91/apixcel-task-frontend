@@ -11,10 +11,13 @@ import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import CustomForm from "./CustomFrom";
 import CustomInput from "./CustomInput";
+import { useSignUpMutation } from "@/src/redux/api/userApi";
 export interface ILoginFormProps {}
 export default function SignupForm({}: ILoginFormProps) {
   const router = useRouter();
   const [show, setShow] = useState(false);
+  const [signUpUser] = useSignUpMutation();
+
   const [isPending, setIsPending] = useState(false);
 
   //   useEffect(() => {
@@ -27,9 +30,17 @@ export default function SignupForm({}: ILoginFormProps) {
   //     }
   //   }, [data]);
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
-    // handleSignup(JSON.stringify(data));
-    // userLoading(true);
-    console.log(data);
+    const toastId = toast.loading("Loading...");
+
+    const res = await signUpUser(data);
+
+    if (res?.data?.success) {
+      toast.success(res.data.message, { id: toastId });
+      router.push("/");
+    } else {
+      toast.error("Something went wrong", { id: toastId });
+    }
+    console.log(res);
   };
 
   return (
