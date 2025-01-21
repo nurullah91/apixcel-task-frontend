@@ -1,17 +1,10 @@
-export interface IDashboardProps {}
-export default function Dashboard({}: IDashboardProps) {
+import ProductTable from "@/src/components/Table/ProductTable";
+
+export default function Dashboard() {
   return (
     <div>
-      <h1
-        style={{
-          fontWeight: "bold",
-          textAlign: "center",
-          color: "#f43f5e",
-          fontSize: "1.875rem",
-        }}
-      >
-        This is Dashboard component
-      </h1>
+      <h2 className="text-2xl font-bold text-center">All Products</h2>
+      <ProductTable />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import NextLink from "next/link";
 
 import { Logo } from "@/src/components/icons";
 import NavbarButton from "./NavbarButton";
+import { ThemeSwitch } from "./theme-switch";
 
 export const Navbar = () => {
   return (
@@ -28,6 +29,7 @@ export const Navbar = () => {
         justify="end"
       >
         <NavbarItem className="hidden md:flex">
+          <ThemeSwitch />
           {/* Navbar buttons from client component */}
           <NavbarButton />
         </NavbarItem>
@@ -39,6 +41,7 @@ export const Navbar = () => {
 
       <NavbarMenu>
         <div className="mx-4 mt-2 flex flex-col gap-2">
+          <ThemeSwitch />
           {/* Navbar buttons from client component */}
           <NavbarButton />
         </div>

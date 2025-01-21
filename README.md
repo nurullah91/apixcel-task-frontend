@@ -1,5 +1,7 @@
 # APIXcel
 
+this project is an express.js backend project for apixcel company's job task. This is a basic backend project with crud operations and advance search query and login, register, forget and reset password also create product with image upload via backend.
+
 This is a template for creating applications using Next.js 14 (app directory) and HeroUI (v2).
 
 [Try it on CodeSandbox](https://githubbox.com/heroui-inc/heroui/next-app-template)
@@ -14,15 +16,9 @@ This is a template for creating applications using Next.js 14 (app directory) an
 - [Framer Motion](https://www.framer.com/motion/)
 - [next-themes](https://github.com/pacocoursey/next-themes)
 
-## How to Use
+## Local installation guideline
 
-### Use the template with create-next-app
-
-To create a new project based on this template using `create-next-app`, run the following command:
-
-```bash
-npx create-next-app -e https://github.com/heroui-inc/next-app-template
-```
+clone the repository and add required env variables find in .env.example and run the following command.
 
 ### Install dependencies
 
@@ -38,16 +34,6 @@ npm install
 npm run dev
 ```
 
-### Setup pnpm (optional)
+then it will run on the localhost 3000 port.
 
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
-
-```bash
-public-hoist-pattern[]=*@heroui/*
-```
-
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
-
-## License
-
-Licensed under the [MIT license](https://github.com/heroui-inc/next-app-template/blob/main/LICENSE).
+# Live Link: https://apixcel-frontend-five.vercel.app
