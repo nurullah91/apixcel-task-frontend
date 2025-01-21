@@ -4,40 +4,44 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@heroui/button";
 import { FieldValues, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { resetPasswordSchema } from "@/src/schema";
 import { FaEyeSlash } from "react-icons/fa6";
 import { FaEye } from "react-icons/fa";
 import CustomForm from "./CustomFrom";
 import CustomInput from "./CustomInput";
+import { useResetPasswordMutation } from "@/src/redux/api/userApi";
 export interface IResetPasswordFormProps {}
 export default function ResetPasswordForm({}: IResetPasswordFormProps) {
   const searchParams = useSearchParams();
   const [show, setShow] = useState(false);
   const router = useRouter();
   const userId = searchParams.get("id");
-  const resetToken = searchParams.get("resetToken");
-
-  const [isPending, setIsPending] = useState(false);
-
-  // useEffect(() => {
-  //   if (data && data?.success) {
-  //     toast.success(data.message);
-  //     router.push("/login");
-  //   } else if (data && !data?.success) {
-  //     toast.error(data?.message as string);
-  //   }
-  // }, [data]);
+  const token = searchParams.get("resetToken");
+  const [resetPass, { isLoading }] = useResetPasswordMutation();
 
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
+    const toastId = toast.loading("Loading...");
+
     const resetPasswordData = {
       ...data,
       userId,
     };
 
-    // handleReset(JSON.stringify(resetPasswordData));
-    console.log(data);
+    try {
+      const res = await resetPass({ resetPasswordData, token });
+
+      if (res.data.success) {
+        toast.success(res.data.message, { id: toastId });
+
+        router.push("/login");
+      } else {
+        toast.error("Something went wrong", { id: toastId });
+      }
+    } catch {
+      toast.error("Something went wrong", { id: toastId });
+    }
   };
 
   return (
@@ -64,13 +68,13 @@ export default function ResetPasswordForm({}: IResetPasswordFormProps) {
         </div>
         <Button
           className="mt-3"
-          isDisabled={isPending}
+          isDisabled={isLoading}
           radius="sm"
           size="sm"
           type="submit"
           color="primary"
         >
-          {isPending ? "Loading..." : "Reset password"}
+          {isLoading ? "Loading..." : "Reset password"}
         </Button>
       </CustomForm>
     </div>

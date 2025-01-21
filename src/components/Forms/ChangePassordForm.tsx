@@ -1,32 +1,38 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation"; // To handle redirection
+import { useRouter } from "next/navigation"; // To handle redirection
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@heroui/button";
 import { FieldValues, SubmitHandler } from "react-hook-form";
 import { changePasswordSchema } from "@/src/schema";
-import { useState } from "react";
 import CustomForm from "./CustomFrom";
 import CustomInput from "./CustomInput";
+import { toast } from "sonner";
+import { useChangePasswordMutation } from "@/src/redux/api/userApi";
+import { useAppDispatch } from "@/src/redux/store";
+import { logout } from "@/src/redux/authSlice";
 
 export default function ChangePasswordForm() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const redirect = searchParams.get("redirect");
-  const [isPending, setIsPending] = useState(false);
+  const [resetPass, { isLoading }] = useChangePasswordMutation();
+  const dispatch = useAppDispatch();
 
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
-    // handleChangePassword(JSON.stringify(data));
-    // userLoading(true);
-    console.log(data);
-  };
+    const toastId = toast.loading("Loading...");
 
-  //   if (!isPending && isSuccess) {
-  //     if (redirect) {
-  //       router.push(redirect);
-  //     } else {
-  //       router.push("/");
-  //     }
-  //   }
+    try {
+      const res = await resetPass(data);
+
+      if (res.data.success) {
+        toast.success(res.data.message, { id: toastId });
+        dispatch(logout());
+        router.push("/login");
+      } else {
+        toast.error("Something went wrong", { id: toastId });
+      }
+    } catch {
+      toast.error("Something went wrong", { id: toastId });
+    }
+  };
 
   return (
     <div>
@@ -48,12 +54,13 @@ export default function ChangePasswordForm() {
         />
         <Button
           className="mt-3"
-          isDisabled={isPending}
+          isDisabled={isLoading}
           radius="sm"
           size="sm"
           type="submit"
+          color="primary"
         >
-          {isPending ? "Loading..." : "Change password"}
+          {isLoading ? "Loading..." : "Change password"}
         </Button>
       </CustomForm>
     </div>

@@ -7,44 +7,52 @@ import { toast } from "sonner";
 
 import { signupSchema } from "@/src/schema";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import CustomForm from "./CustomFrom";
 import CustomInput from "./CustomInput";
 import { useSignUpMutation } from "@/src/redux/api/userApi";
+import { verifyJWT } from "@/src/utils/verifyJWT";
+import { TUser } from "@/src/types";
+import { setUser } from "@/src/redux/authSlice";
+import { useAppDispatch } from "@/src/redux/store";
 export interface ILoginFormProps {}
 export default function SignupForm({}: ILoginFormProps) {
   const router = useRouter();
   const [show, setShow] = useState(false);
-  const [signUpUser] = useSignUpMutation();
+  const [signUpUser, { isLoading }] = useSignUpMutation();
 
-  const [isPending, setIsPending] = useState(false);
+  const dispatch = useAppDispatch();
 
-  //   useEffect(() => {
-  //     if (data && !data?.success) {
-  //       toast.error(data?.message as string);
-  //     } else if (data && data?.success) {
-  //       toast.success(data.message);
-
-  //       router.push("/");
-  //     }
-  //   }, [data]);
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
     const toastId = toast.loading("Loading...");
 
-    const res = await signUpUser(data);
+    try {
+      const res = await signUpUser(data);
 
-    if (res?.data?.success) {
-      toast.success(res.data.message, { id: toastId });
-      router.push("/");
-    } else {
+      if (res.data.data.accessToken) {
+        const user = verifyJWT(res.data?.data?.accessToken) as TUser;
+
+        dispatch(setUser({ user: user, token: res?.data?.data?.accessToken }));
+
+        if (user.role === "admin") {
+          toast.success(res.data.message, { id: toastId });
+
+          router.push("/dashboard");
+        } else {
+          toast.success(res.data.message, { id: toastId });
+          router.push("/");
+        }
+      } else {
+        toast.error("Something went wrong", { id: toastId });
+      }
+    } catch {
       toast.error("Something went wrong", { id: toastId });
     }
-    console.log(res);
   };
 
   return (
-    <div>
+    <div className="w-11/12 lg:w-1/2 mx-auto">
       <CustomForm resolver={zodResolver(signupSchema)} onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
           <div className="relative">
@@ -77,14 +85,14 @@ export default function SignupForm({}: ILoginFormProps) {
         </div>
         <Button
           className="mt-3"
-          isDisabled={isPending}
+          isDisabled={isLoading}
           radius="sm"
           size="sm"
           type="submit"
           fullWidth
           color="primary"
         >
-          {isPending ? "Loading..." : "Signup"}
+          {isLoading ? "Loading..." : "Signup"}
         </Button>
       </CustomForm>
     </div>

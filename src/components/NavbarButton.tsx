@@ -36,11 +36,21 @@ export default function NavbarButton({}: INavbarButtonProps) {
             href={"/dashboard"}
             startContent={<HeartFilledIcon className="text-danger" />}
             variant="flat"
+            size="sm"
           >
             Dashboard
           </Button>
+          <Button
+            as={Link}
+            className="text-sm font-normal text-default-600 bg-default-100"
+            href={"/change-password"}
+            variant="flat"
+            size="sm"
+          >
+            Change password
+          </Button>
           <button
-            className="text-sm font-normal text-default-600 bg-default-100 px-4 py-2 rounded-lg"
+            className="text-sm font-normal text-default-600 bg-default-100 px-3 py-1 rounded-lg"
             onClick={handleLogout}
           >
             Logout

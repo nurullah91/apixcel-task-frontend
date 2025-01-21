@@ -4,25 +4,28 @@ import { Button } from "@heroui/button";
 import { FieldValues, SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
 import { forgetPasswordSchema } from "@/src/schema";
-import { useEffect, useState } from "react";
 import CustomForm from "./CustomFrom";
 import CustomInput from "./CustomInput";
+import { useForgetPasswordMutation } from "@/src/redux/api/userApi";
 
 export interface IForgetPasswordFormProps {}
 export default function ForgetPasswordForm({}: IForgetPasswordFormProps) {
-  const [isPending, setIsPending] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [sendEmail, { isLoading, isSuccess }] = useForgetPasswordMutation();
 
-  //   useEffect(() => {
-  //     if (data && !data?.success) {
-  //       toast.error(data?.message as string);
-  //     } else if (data && data?.success) {
-  //       toast.success(data.message);
-  //     }
-  //   }, [data]);
   const handleSubmit: SubmitHandler<FieldValues> = async (data) => {
-    // handleEmailSend(JSON.stringify(data));
-    console.log(data);
+    const toastId = toast.loading("Loading...");
+
+    try {
+      const res = await sendEmail(data);
+
+      if (res.data.success) {
+        toast.success("Email send success", { id: toastId });
+      } else {
+        toast.error("Failed to send email", { id: toastId });
+      }
+    } catch {
+      toast.error("Something went wrong", { id: toastId });
+    }
   };
 
   return (
@@ -35,17 +38,17 @@ export default function ForgetPasswordForm({}: IForgetPasswordFormProps) {
 
         <Button
           className="my-3"
-          isDisabled={isPending}
+          isDisabled={isLoading}
           radius="sm"
           size="sm"
           type="submit"
           color="primary"
         >
-          {isPending ? "Sending..." : "Send Email"}
+          {isLoading ? "Sending..." : "Send Email"}
         </Button>
       </CustomForm>
       <div>
-        {!isPending && isSuccess && (
+        {!isLoading && isSuccess && (
           <p className="text-red-500 text-xs my-2">
             An email sent to your email with reset password link
           </p>
